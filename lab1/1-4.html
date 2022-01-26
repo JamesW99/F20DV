@@ -1,0 +1,26 @@
+<!-- Exercise 4: ‘selecting’ and modifying your ‘div’ elements after you’ve created and added them (e.g., select the first div element and make its content text equal to ‘start’ – also change its color to ‘purple’. -->
+    
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 4:<br><br>
+<body>
+</body>
+<script>
+    for (var i = 1; i <= 10; ++i) {
+        var div = d3.select('body').append('div');
+        div.text(i);
+        if (i <= 5)
+            div.style('color', 'red');
+        else
+            div.attr('style', 'color:green');
+    }
+    
+    d3.select('div').style('color', 'purple');
+    d3.select('div').text('start');
+
+</script>
+</html>

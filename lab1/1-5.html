@@ -1,0 +1,29 @@
+<!-- Exercise 5: Exercise: Add to the ‘chain syntax’ version for the ‘hello world’ example above – so it also sets the ‘color’ of the text to green. -->
+    
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 5:<br><br>
+
+<body>
+</body>
+
+<script>
+    for (var i = 1; i <= 10; ++i) {
+        var div = d3.select('body').append('div');
+        div.text(i);
+        if (i <= 5)
+            div.style('color', 'red');
+        else
+            div.attr('style', 'color:green');
+    }
+    
+    d3.select('div').style('color', 'purple');
+    d3.select('div').text('start');
+    d3.select("body").append('div').text("Hello World!").style('color', 'green');
+
+</script>
+</html>

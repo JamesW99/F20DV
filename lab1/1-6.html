@@ -1,0 +1,39 @@
+<!-- Exercise 6: Modify the example above so the ‘otherdata’ contains an additional variable called color (print this color value out in the ‘text’ method.     -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+    Exercise 6:<br><br>
+</head>
+
+<body>
+    <div></div>
+    <div></div>
+    <div></div>
+</body>
+
+<script>
+let otherdata = [ 
+    {name:'test', val:10, color:'yellow'}, 
+    {name:'other', val:50, color:'green'},
+    {name:'full', val:200, color:'red'}
+];
+
+let paragraph = d3.select("body")
+    .selectAll("div")
+    .data(otherdata)
+    .text(function (d, i) {
+        console.log("d.name: " + d.name);
+        console.log("d.val: " + d.val);
+        console.log("i: " + i);
+        console.log("color: " + d.color);
+        console.log("this: " + this);
+        return 'cont: ' + d.color; // return value is used to set the 'text'
+    });
+
+</script>
+
+</html>

@@ -1,0 +1,35 @@
+<!-- Exercise 8: Modify the above code, use the following data:  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 8:<br><br>
+<body>
+
+</body>
+
+<script>
+    var myData = ['a', 4, 1, 'b', 6, 2, 8, 9, 'z' ];
+   
+    var p = d3.select("body")
+    .selectAll("span")
+    .data(myData)
+    .enter()
+    .append("span")
+    .text(function (d, i) {
+        return d;
+    })
+    .style("color", function(d, i) {
+        if ( typeof d === "number"){
+            return 'green';
+        }
+        if(typeof d === "string") {
+            return 'blue';
+        }
+    });
+</script>
+
+</html>
