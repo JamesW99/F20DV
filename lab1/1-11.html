@@ -1,0 +1,57 @@
+<!-- Exercise 11: Exercise: Modify the code so the example draws a ‘square shape’ (4 lines) – each side of the square a different color -->
+
+<!-- source is https://bl.ocks.org/mbostock/4060366 -->
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+Exercise 11:<br><br>
+<body>
+</body>
+
+<script>
+    //Create SVG element
+    var svg = d3.select("body")
+    .append("svg")
+    .attr("width", 400)
+    .attr("height", 400)
+    .style("border", '1px solid green');
+    
+    //Create line element inside SVG
+    //north
+    svg.append("line")
+    .attr("x1", 100)
+    .attr("x2", 300)
+    .attr("y1", 100)
+    .attr("y2", 100)
+    .attr("stroke", "blue")
+
+    //south
+    svg.append("line")
+    .attr("x1", 100)
+    .attr("x2", 300)
+    .attr("y1", 300)
+    .attr("y2", 300)
+    .attr("stroke", "black")
+    
+    //west
+    svg.append("line")
+    .attr("x1", 100)
+    .attr("x2", 100)
+    .attr("y1", 100)
+    .attr("y2", 300)
+    .attr("stroke", "purple")
+
+    //east
+    svg.append("line")
+    .attr("x1", 300)
+    .attr("x2", 300)
+    .attr("y1", 100)
+    .attr("y2", 300)
+    .attr("stroke", "red")
+
+</script>
+
+</html>
