@@ -1,0 +1,77 @@
+<!-- Exercise 19: Put the code in a ‘function’ so the bar chart is only displayed when the function is called. Also if the function is called twice, then it will show the bar chart twice on screen. Extend this function so it takes a ‘csv’ file name as the input argument. Call it twice and it displays two different bar charts using different data on screen. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 19:<br><br>
+<body>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</body>
+
+<script>
+const link = "https://raw.githubusercontent.com/JamesW99/JamesW99.github.io/main/lab1/csv.csv?token=GHSAT0AAAAAABN4OYQURMC3NRRIOXJ2PP7WYQDVJYA"
+const link2 = "https://raw.githubusercontent.com/JamesW99/JamesW99.github.io/main/lab1/csv2.csv?token=GHSAT0AAAAAABN4OYQVNEW3JTOVTLUVGO7UYQD3KSA"
+
+const data = []
+function run(url){
+    d3.csv(url, function(d) {
+        data.push(parseInt(d.score));
+        // console.log(data)
+
+
+    }).then(function draw(){
+        console.log(data)
+        const width = 600;
+        const barHeight = 20;
+        const margin = 1;
+        var scale = d3.scaleLinear()
+            .domain([d3.min(data), d3.max(data)])
+            .range([50, 500]);
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", barHeight * data.length);
+        var g = svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("transform", function (d, i) {
+                return "translate(0," + i * barHeight + ")";
+            });
+        g.append("rect")
+            .attr("width", function (d) {
+                return scale(d);
+            })
+            .attr("fill", function(d, i) {
+                    if(d < 100){
+                        return "green";
+                    } else if(d < 500){
+                        return "blue";
+                    } else{
+                        return "red";
+                    }
+            })
+            .attr("height", barHeight - margin)
+        g.append("text")
+            .attr("x", function (d) { 
+                return (scale(d)); 
+            })
+            .attr("y", barHeight / 2)
+            .attr("dy", ".35em")
+            .style('text-anchor', 'end', 'fill','white')
+            .text(function (d) { 
+                return d; 
+            });
+    })
+}
+run(link);
+run(link2);
+</script>
+
+</html>
