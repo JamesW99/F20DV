@@ -1,0 +1,71 @@
+<!-- Exercise 20: Update the example so an axis is drawn on all sides (axis on the left, right, top and bottom). Make the top and right axis the color blue (text and lines are blue in color).  -->
+<!-- ref: https://stackoverflow.com/questions/38414926/looking-for-a-better-way-to-alter-the-color-of-axis-components-in-d3-js-v4 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+Exercise 20:<br><br>
+<body>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</body>
+
+<script>
+const width = 400;
+const height = 300;
+var data = [10, 15, 20, 25, 30];
+// Append SVG
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+// Create scale
+var xscale = d3.scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([0, width - 100]);
+var yscale = d3.scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([height/2, 0]);
+var topscale = d3.scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([0, width - 100]);
+var rightscale = d3.scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([height/2, 0]);
+
+var x_axis = d3.axisBottom()
+    .scale(xscale);
+var y_axis = d3.axisLeft()
+    .scale(yscale);
+var top_axis = d3.axisTop()
+    .scale(topscale);
+var right_axis = d3.axisRight()
+    .scale(rightscale);
+    
+svg.append("g")
+    .attr("transform", "translate(50, 30)")
+    .call(y_axis);
+svg.append("g")
+    .attr("transform", "translate(350, 30)" )
+    .call(right_axis)
+    .attr("fill", "blue")
+    .attr("stroke", "blue");
+var xAxisTranslate = height/2 + 30;
+svg.append("g")
+    .attr("transform", "translate(50, " + xAxisTranslate +")")
+    .call(x_axis)
+var xAxisTranslate = height/2 -120;
+svg.append("g")
+    .attr("transform", "translate(50, " + xAxisTranslate +")")
+    .call(top_axis)
+    .attr("fill", "blue")
+    .attr("stroke", "blue")
+    
+</script>
+</html>
