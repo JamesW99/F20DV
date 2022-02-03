@@ -21,7 +21,7 @@ const margin = 40;
 const xMax = xSize - margin*2;
 const yMax = ySize - margin*2;
 // Create Random Points
-const numPoints = 200;
+const numPoints = 100;
 const data = [];
 
 function fun(wavetype){
@@ -29,7 +29,7 @@ function fun(wavetype){
     for (let i = 0; i < numPoints; i++) { 
         
         if (wavetype === 'sin'){
-            data.push( { x: i/100, y: Math.tan( 6.2 * i/100 ) } ); 
+            data.push( { x: i/100, y: Math.sin( 6.2 * i/100 ) } ); 
         }
         if (wavetype === 'cos'){
             data.push( { x: i/100, y: Math.cos( 6.2 * i/100 ) } ); 
@@ -37,7 +37,6 @@ function fun(wavetype){
         if (wavetype === 'tan'){
             data.push( { x: i/100, y: Math.tan( 6.2 * i/100 ) } ); 
         }
-        
     }
     // Get the 'limits' of the data - the full extent (mins and max)
     // so the plotted data fits perfectly
@@ -90,7 +89,9 @@ function fun(wavetype){
         .y(function(d) { return y(d.y) })
     );
 }
-fun('sin');
+// fun('sin');
+fun('cos');
+// fun('tan');
 
 </script>
 </html>
