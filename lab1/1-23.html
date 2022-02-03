@@ -1,0 +1,89 @@
+<!-- Exercise 23: Load in some test data from a csv and plot the line (instead of ‘generating’ the data you load it from an external file).  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+Exercise 23:<br><br>
+<body>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</body>
+
+<script>
+const csvlink = 'https://raw.githubusercontent.com/JamesW99/JamesW99.github.io/main/lab1/line.csv?token=GHSAT0AAAAAABN4OYQVEGHD7ZX4IUBJSV5AYQFEEFA'
+// Set Dimensions
+const xSize = 600; const ySize = 600;
+const margin = 40;
+const xMax = xSize - margin*2;
+const yMax = ySize - margin*2;
+// Create Random Points
+const numPoints = 5;
+var data = [];
+
+d3.csv(csvlink, function(d){
+    data.push( { x: parseInt(d.x), y: parseInt(d.y) } );
+}).then(
+
+function run(wavetype){
+
+    // Get the 'limits' of the data - the full extent (mins and max)
+    // so the plotted data fits perfectly
+    const xExtent = d3.extent( data, d=>{ return d.x } );
+    const yExtent = d3.extent( data, d=>{ return d.y } );
+
+    // Append SVG Object to the Page
+    const svg = d3.select("body")
+        .append("svg")
+        .attr('width', xSize )
+        .attr('height', ySize )
+        .append("g")
+        .attr("transform","translate(" + margin + "," + margin + ")");
+
+    // X Axis
+    const x = d3.scaleLinear()
+        .domain([ xExtent[0], xExtent[1] ])
+        .range([0, xMax]);
+
+    // bottom
+    svg.append("g")
+        .attr("transform", "translate(0," + yMax + ")")
+        .call(d3.axisBottom(x))
+        .attr('color', 'green'); // make bottom axis green
+        
+    // top
+    svg.append("g")
+        .call(d3.axisTop(x));
+    // Y Axis
+    const y = d3.scaleLinear()
+        .domain([ yExtent[0], yExtent[1] ])
+        .range([ yMax, 0]);
+
+    // left y axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+    // right y axis
+    svg.append("g")
+        .attr("transform", `translate(${yMax},0)`)
+        .call(d3.axisRight(y));
+
+    // Add the line
+    svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+        .x(function(d) { return x(d.x) })
+        .y(function(d) { return y(d.y) })
+    );
+})
+// run('sin');
+    
+</script>
+</html>
