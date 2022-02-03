@@ -1,0 +1,117 @@
+<!-- Exercise 21: Add an ‘axis’ to the bar chart example (bottom and left axis for the bar chart).  -->
+<!-- 练习 21：在条形图示例中添加一个“轴”（条形图的底部和左侧轴）。 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+Exercise 21:<br><br>
+
+<body>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</body>
+<script src='https://d3js.org/d3.v7.min.js'></script> 
+ 
+
+<script>
+const link = "https://raw.githubusercontent.com/JamesW99/JamesW99.github.io/main/lab1/csv.csv?token=GHSAT0AAAAAABN4OYQURMC3NRRIOXJ2PP7WYQDVJYA"
+const link2 = "https://raw.githubusercontent.com/JamesW99/JamesW99.github.io/main/lab1/csv2.csv?token=GHSAT0AAAAAABN4OYQVKVTWBNFRSLBEE5PMYQD3NOA"
+
+const width = 400;
+const height = 300;
+
+const data = [80, 150, 200, 500, 300];
+function run(url){
+    d3.csv(url, function(d) {
+        // data.push(parseInt(d.score));
+        // console.log(data)
+
+
+    }).then(function draw(){
+        console.log(data)
+        const width = 600; //画布参数
+        const barHeight = 20;
+        const margin = 1;
+        var scale = d3.scaleLinear()
+            .domain([d3.min(data), d3.max(data)])
+            .range([50, 500]);
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", barHeight * data.length);
+
+        var temAxisTranslate = height/2 + 10;
+        var g = svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("transform", function (d, i) {
+                // 50 means bar离左边的距离 
+                return "translate(50," + i * barHeight + ")";
+            });
+            // .attr("transform", "translate(50, " + xAxisTranslate +")");
+            // .attr(0, temAxisTranslate);
+        g.append("rect")
+            .attr("width", function (d) {
+                return scale(d);
+            })
+            .attr("fill", function(d, i) {
+                    if(d < 100){
+                        return "green";
+                    } else if(d < 500){
+                        return "blue";
+                    } else{
+                        return "red";
+                    }
+            })
+            .attr("height", barHeight - margin)
+        g.append("text")
+            .attr("x", function (d) { 
+                return (scale(d)); 
+            })
+            .attr("y", barHeight / 2)
+            .attr("dy", ".35em")
+            .style('text-anchor', 'end', 'fill','white')
+            .text(function (d) { 
+                return d; 
+            });
+
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var xscale = d3.scaleLinear()
+            .domain([0, d3.max(data)])
+            .range([0, width - 100]);
+        var yscale = d3.scaleLinear()
+            .domain([0, d3.max(data)])
+            .range([height/2, 0]);
+
+        var x_axis = d3.axisBottom()
+            .scale(xscale);
+        var y_axis = d3.axisLeft()
+            .scale(yscale);
+
+        svg.append("g")
+            // .attr("transform", "translate(50, 10)")
+            .attr("transform", "translate(50, -150)")
+            .call(y_axis);
+
+        var xAxisTranslate = height/2 + 10;
+        svg.append("g")
+            .attr("transform", "translate(50, " + 1 +")")
+            .call(x_axis)
+
+        
+    })
+}
+run(link);
+</script>
+</html>
