@@ -1,0 +1,96 @@
+<!-- Exercise 12: Build an SVG scene which is created from an external file. You need to create a csv with the information about the shapes. You should include columns in your csv file for the type of shape (circle, rectangle, ellipse, line), its dimensions and position, and color. Your program reads the data and creates and displays the shapes to the screen. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+Exercise 12:<br><br>
+<body>
+    <pre>
+CSV format:
+#     type, color, x, y, ...
+# rect:                       width, height
+# circle:                     radius
+# ellipse:                    rx, ry
+# line:                       x1, y1
+    </pre>
+
+    <!-- initial shape -->
+    <textarea id="csvbox" style="width: 800px; height: 100px;" onchange="redraw();">
+rect,    green,  10, 20, 20, 30
+circle,   red,    40, 40, 20
+ellipse, yellow, 40, 80, 20, 30
+line,    purple, 60, 20, 80, 80
+</textarea>
+
+    <br>
+
+    Enter new code in the text box and click the box below to update the shape. <br>
+    <div id="log">
+    </div>
+    <svg id="canvas" width=800px height="600px" style="border: 1px solid green">
+</body>
+
+<script>
+    // Supported shapes
+    const MAPPING = {
+        'rect': ['fill', 'x', 'y', 'width', 'height'],
+        'circle': ['fill', 'cx', 'cy', 'r'],
+        'ellipse': ['fill', 'cx', 'cy', 'rx', 'ry'],
+        'line': ['stroke', 'x1', 'y1', 'x2', 'y2'],
+    };
+
+    function redraw() {
+        var svg = d3.select("#canvas");
+        svg.selectAll("*").remove();
+        
+        var logdiv = d3.select('#log');
+        logdiv.selectAll('p').remove();
+
+        // read csv box
+        var csv = d3.select("#csvbox").property('value');
+        var lineno = 0;       
+        for (var line of csv.split('\n')) {
+            lineno = lineno + 1;
+            // read single line
+            var cells = line.split(",").map(x => x.trim()).filter(x => x.length != 0);
+            if (cells.length == 0)
+                continue;
+
+            function log(x) {
+                logdiv.append('p').text(`Line ${lineno}: ${x}`);
+            }
+
+            try {
+                var kind = cells[0];
+                var attrs = MAPPING[kind];
+                if (attrs == undefined) {
+                    log(`unknown shape ${kind}`);
+                    break;
+                }
+
+                var values = cells.slice(1);
+                if (attrs.length != values.length) {
+                    log(`csv length mismatch (expected ${attrs.length}, got ${values.length}`);
+                    break;
+                }
+
+                var shape = svg.append(kind);
+                // draw
+                for (var i = 0; i < attrs.length; ++i) {
+                    shape.attr(attrs[i], values[i]);
+                }
+            } catch (e) {
+                log(`error handling: ${e}`)
+            }
+        }
+    }
+
+    redraw();
+</script>
+
+</html>
