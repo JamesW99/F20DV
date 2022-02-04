@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+
+<body>
+    <svg style="border: 1px solid green"></svg>
+</body>
+
+<script>
+    var weather = [
+        ['Mon', 2, 'partly_cloudy'],
+        ['Tue', 3, 'sunny'],
+        ['Wed', 5, 'sunny'],
+        ['Thu', -1, 'snow_light'],
+        ['Fri', -2, 'snow_light'],
+        ['Sat', 4, 'sunny'],
+        ['Sun', 10, 'sunny'],
+    ];
+    var temps = weather.map(x => x[1]);
+    var maxTemp = Math.max.apply(Math, temps),
+        minTemp = Math.min.apply(Math, temps);
+
+    var height = 600,
+        width = 800;
+    var scaleFactor = 10;
+    var barHeight = 20;
+
+    var graph = d3
+    .select("svg")
+    .attr('height', height)
+    .attr('width', width);
+    var x = d3.scaleBand() //刻度
+    .range([10, width - 10])
+    .domain(weather.map(x => x[0]))
+    .padding(0.2);
+    var y = d3.scaleLinear()
+    .range([40, height - 40])
+    .domain([minTemp, maxTemp]);
+
+    var bars = graph.selectAll('bars')
+    .data(weather)
+    .enter()
+    .append('g');
+
+    var color = d3.scaleSequential()
+        .domain([minTemp, maxTemp])
+        .interpolator(d3.interpolatePuRd);
+
+    bars.append('rect')
+        .attr('x', v => x(v[0]))
+        .attr('y', v => height - y(v[1]))
+        .attr('width', x.bandwidth())
+        .attr('height', v => y(v[1]))
+        .attr('fill', v => color(v[1]));
+    
+    bars.append('svg:image')
+        .attr("xlink:href", v => `https://ssl.gstatic.com/onebox/weather/48/${v[2]}.png`)
+        .attr("width", 40)
+        .attr("height", 40)
+        .attr("x", v => x(v[0]) + x.bandwidth() / 2 - 40 / 2)
+        .attr("y", v => height - y(v[1]) - 40);
+</script>
+
+</html>
