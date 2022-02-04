@@ -99,13 +99,13 @@ function run(url){
         var y_axis = d3.axisLeft()
             .scale(yscale);
 
+        var xAxisTranslate = height/2 + 10;
         svg.append("g")
             // .attr("transform", "translate(50, 10)")
             .attr("transform", "translate(50, -150)")
-            .call(y_axis);
+            .call(y_axis)
 
-        var xAxisTranslate = height/2 + 10;
-        svg.append("g")
+        // svg.append("g")
             .attr("transform", "translate(50, " + 1 +")")
             .call(x_axis)
 
