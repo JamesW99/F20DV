@@ -32,7 +32,7 @@
     .select("svg")
     .attr('height', height)
     .attr('width', width);
-    var x = d3.scaleBand() //刻度
+    var x = d3.scaleBand()
     .range([10, width - 10])
     .domain(weather.map(x => x[0]))
     .padding(0.2);

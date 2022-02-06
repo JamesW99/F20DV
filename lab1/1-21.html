@@ -35,7 +35,7 @@ function run(url){
 
     }).then(function draw(){
         console.log(data)
-        const width = 600; //画布参数
+        const width = 600;
         const barHeight = 20;
         const margin = 1;
         var scale = d3.scaleLinear()
@@ -52,7 +52,7 @@ function run(url){
             .enter()
             .append("g")
             .attr("transform", function (d, i) {
-                // 50 means bar离左边的距离 
+                // 50 means bar distance to the left 
                 return "translate(50," + i * barHeight + ")";
             });
             // .attr("transform", "translate(50, " + xAxisTranslate +")");
