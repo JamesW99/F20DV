@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-2:<br><br>
+<body>
+</body>
+
+<style>
+    div {
+        position: relative;
+        background-color: yellow;
+        padding: 20px;
+        display: none;
+    }
+
+    span:hover + div {
+        position: absolute;
+        display: inline-block;
+    }
+</style>
+
+<script>
+    d3.select("body")
+        .append("span")
+        .text("this is span, hold your mouse on me.")
+
+    d3.select("body")
+        .append("div")
+        .text("Surprises")
+
+</script>
+
+</html>
