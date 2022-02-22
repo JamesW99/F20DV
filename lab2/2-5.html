@@ -1,0 +1,50 @@
+<!-- ref: https://stackoverflow.com/a/65171512 -->
+<!-- http://bl.ocks.org/AndrewStaroscik/5222370 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-5:<br><br>
+<body>
+</body>
+
+
+<script>
+var w = 3840;
+var h = 2160;
+var padding = 20;
+var border=1;
+var bordercolor='black';
+
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("border",border);
+
+var text = svg.append('text')
+    .attr("x", 0)
+    .attr("y", 0)
+    .text("(0,0)")
+
+
+d3.select('svg')
+    // .attr('width', 600)
+    // .attr('height', 600)
+    .on('mousemove', function(event) {
+        var coords = d3.pointer( event );
+        // var coordinates = d3.pointer(this);
+        var x = coords[0];
+        var y = coords[1];
+        console.log( coords[0], coords[1] ) // log the mouse x,y position
+        text.attr("x", x)
+        text.attr("y", y)
+        text.text("(" + x + ", " + y + ")")
+    });
+
+
+</script>
+</html>
