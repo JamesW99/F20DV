@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-3:<br><br>
+<body>
+</body>
+
+
+<script>
+
+// ini color
+d3.select('body')
+    // define blue shape
+    .append("div")
+    .style('width', '100px')
+    .style('height', '100px')
+    .style('background-color', 'blue')
+    .text('100px')
+
+d3.selectAll("div")
+
+// mouse on color
+    .on("mouseover", function(event){
+        d3.select(this)
+            .transition()
+            .duration(1000)
+            .style('width', '200px')
+            .style('height', '200px')
+            .style("background-color", "red")
+            .text('200px')
+    })
+
+// mouse out color
+    .on("mouseout", function(){    
+        d3.select(this)
+            .transition()
+            .duration(1000)
+            .style('width', '100px')
+            .style('height', '100px')
+            .style("background-color", "blue")
+            .text('100px')
+    });
+
+</script>
+</html>
