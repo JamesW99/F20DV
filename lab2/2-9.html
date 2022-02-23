@@ -1,0 +1,39 @@
+<!-- ref: https://bl.ocks.org/d3noob/fa4cfde5450852cfef0603857f080585 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-9:<br><br>
+<body>
+</body>
+
+<script>
+d3.select('body')
+    .append("div")
+    .style('width', '100px')
+    .style('height', '100px')
+    .style('background-color', 'blue')
+    .style('transform', 'scale(1.0)')
+    .transition()
+    .ease( d3.easeBounce )
+    .duration(1000)
+    .style("background-color", "red")
+    .style('transform', 'scale(0.5)')
+
+d3.select('body')
+    .append("div")
+    .style('width', '100px')
+    .style('height', '100px')
+    .style('background-color', 'blue')
+    .style('transform', 'scale(1.0)')
+    .transition()
+    .ease( d3.easeLinear )
+    .duration(1000)
+    .style("background-color", "red")
+    .style('transform', 'scale(0.5)')
+    
+</script>
+</html>
