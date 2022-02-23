@@ -1,0 +1,38 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-7:<br><br>
+<body>
+</body>
+
+<script>
+d3.select('body')
+
+    // define blue shape
+    .append("div")
+    .style('width', '100px')
+    .style('height', '100px')
+    .style('background-color', 'blue')
+    .text('100px')
+
+    // became red
+    .transition()
+    .duration(1000)
+    .style("background-color", "red")
+    .text('100px')
+
+    // became yellow and 200*200
+    .transition()
+    .duration(2000)
+    .style('width', '200px')
+    .style('height', '200px')
+    .style("background-color", "green")
+    .text('200px');
+
+</script>
+</html>
