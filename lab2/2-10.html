@@ -1,0 +1,51 @@
+<!-- ref: https://bl.ocks.org/d3noob/fa4cfde5450852cfef0603857f080585 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-10:<br><br>
+<body>
+</body>
+
+
+<script>
+
+// ini color
+d3.select('body')
+    .append("svg")
+    .style('width', '100px')
+    .style('heigh', '100px');
+
+d3.select("svg")
+    .append("circle")
+    .attr("r", 10)
+    .attr("cx", 20)
+    .attr("cy", 20)
+    .style("fill", "red")
+
+d3.selectAll("circle")
+    .on("mouseover", function(event){
+        // mouse on style
+        d3.select(this)
+            .transition()
+            .ease( d3.easeBounce )
+            .duration(1000)
+            .attr("r", 20)
+            .style("fill", "green")
+    })
+
+    // mouse out style
+    .on("mouseout", function(){    
+        d3.select(this)
+            .transition()
+            .ease( d3.easeBounce )
+            .duration(1000)
+            .attr("r", 10)
+            .style("fill", "red")
+    });
+
+</script>
+</html>
