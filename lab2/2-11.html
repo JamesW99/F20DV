@@ -1,0 +1,47 @@
+<!-- ref: http://cs.wellesley.edu/~mashups/pages/am5/d3tutorial1.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-11:<br><br>
+<body>
+</body>
+
+
+<script>
+
+d3.select("body")
+    .append("div")
+    .text("Exercise 2-11")
+    .style("font-size", "24px")
+
+
+d3.selectAll("div")
+    .on("mouseover", function(event){
+        // mouse on style
+        d3.select(this)
+            .text("EXERCISE 2-11")
+            .transition()
+            .ease( d3.easeBounce )
+            .duration(1000)
+            .style("font-size", "36px")
+            .style("color", "red")
+    })
+
+    // mouse out style
+    .on("mouseout", function(){    
+        d3.select(this)
+            .text("Exercise 2-11")
+            .transition()
+            .ease( d3.easeBounce )
+            .duration(1000)
+            .attr("r", 10)
+            .style("font-size", "24px")
+            .style("color", "black")
+    });
+    
+</script>
+</html>
