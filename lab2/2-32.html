@@ -1,4 +1,5 @@
 <!-- ref: https://bl.ocks.org/mbostock/ad70335eeef6d167bc36fd3c04378048 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
@@ -13,13 +14,11 @@ Exercise 2-32:<br><br>
 var width = 400, height = 400;
 // setup svg
 var svg = d3.select('body').append('svg').attr('width',width).attr('height',height);
-
-var nodes = d3.range(100).map(function(d) {
+// generate some random data
+var numNodes = 100;
+    var nodes = d3.range(numNodes).map(function(d) {
     return {radius: Math.random() * 25}
 })
-
-var numNodes = nodes.length;
-
 var simulation = d3.forceSimulation(nodes)
     .force('charge', d3.forceManyBody().strength(5))
     .force('center', d3.forceCenter(width / 2, height / 2))
@@ -31,9 +30,6 @@ var simulation = d3.forceSimulation(nodes)
 var color = d3.scaleLinear()
     .domain([0,numNodes])
     .range(["blue", "red"]);
-
-d3.select(svg)
-    
 
 function ticked() {
     var u = d3.select('svg')
@@ -53,42 +49,25 @@ function ticked() {
     return d.y
     })
     .call(d3.drag()
-        // .container(svg)
-        // .subject(dragsubject)
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended));
 }
 
-// function dragsubject() {
-//     return simulation.find(d3.event.x, d3.event.y);
-// }
-
 function dragstarted(event, d) { 
-    if (!event.active) simulation.alphaTarget(.03).restart(); 
-                                                            
-        d.fx = d.x;  
-        d.fy = d.y;  
+    if (!event.active) simulation.alphaTarget(.03).restart();
+        d.fx = d.x;
+        d.fy = d.y;
 } 
 function dragged(event, d) {
-    d.fx = event.x; 
+    d.fx = event.x;
     d.fy = event.y;
 }
 function dragended(event, d) { 
     if (!event.active) simulation.alphaTarget(0);
-    d.fx = null; 
+    d.fx = null;
     d.fy = null;
 }
 
-// function drawLink(d) {
-//     context.moveTo(d.source.x, d.source.y);
-//     context.lineTo(d.target.x, d.target.y);
-// }
-
-// function drawNode(d) {
-//     context.moveTo(d.x + 3, d.y);
-//     context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
-// }
 console.log('ready..');
-
 </script>
