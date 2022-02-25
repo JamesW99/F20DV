@@ -1,0 +1,27 @@
+<!-- ref:https://observablehq.com/@d3/d3-interpolatedate -->
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-26:<br><br>
+
+<body>
+    <h1><a style="color:gray">interpolate "1970-01-01" and "1971-01-01"</h1><br><br>
+
+    <p>data(0.5) can show a date between 2 dates</p>
+    <p>i.e. if date = d3.interpolateDate(new Date("1970-01-01"), new Date("1971-01-01"))</p>
+    <p>the output of date(0.5) is Thu Jul 02 1970 20:00:00 GMT+0800 (Taipei Standard Time)</p>
+    <p>the result also printed on console</p>
+    
+
+</body>
+
+<script>
+
+date = d3.interpolateDate(new Date("1970-01-01"), new Date("1971-01-01"))
+console.log(date(0.5))
+
+
+</script>

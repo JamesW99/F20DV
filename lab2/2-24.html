@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Exercise 2-24:<br><br>
+
+<body>
+<h1><a style="color:gray">Result is [16.2, 34.4, 5.2] </h1><br>
+because have a equation f(x) = a * (1 - t) + b * t<br>
+in this example 20 is a, 1 is b and 0.2 is t.
+</body>
+
+<script>
+let intr = d3.interpolate( [20, 40, 4], [1, 12, 10])
+console.log("Type of returned function is: ", typeof (intr) );
+console.log( intr(0.2) )
+</script>
