@@ -52,19 +52,17 @@ function ticked() {
 function onMouseOver(event) {
     var circle = d3.select(this)
     circle.attr("fill", "green")
-    
     d3.select('svg')
         .append("text")
         .attr('class', 'val')
-        .attr('x', function() {
-            return circle.attr("cx"); })
-        .attr('y', function() {
-            var y = circle.attr("cy");
-            var r = circle.attr("r");
-            return y
+        .text( function(d) {    // radius
+            return circle.attr("r")
         })
-        .text( function(d) { 
-            return circle.attr("r"); 
+        .attr('x', function(d) { // x axis
+            return circle.attr("cx")
+        })
+        .attr('y', function(d) { // y axis
+            return circle.attr("cy")
         })
 }
 
