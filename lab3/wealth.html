@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+</head>
+Is there a relation between the relative ‘wealth’ of a population and the evolution of the pandemic:<br><br>
+
+<button onclick="show(2020)">2020</button>
+<button onclick="show(2021)">2021</button>
+<button onclick="show(2022)">2022</button>
+
+<a style="color:green">gdp_per_capita</a>
+<a style="color:red">new_cases</a>
+
+   
+        
+    
+<p></p>
+<script>
+    var covid = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv";
+    
+    var size = 1000;
+    var max = 500;
+
+    var svg = d3.select('body')
+        .append('div')
+        .append("svg")
+        .attr("width", size)
+        .attr("height", size)
+        .append("g")
+        .attr("transform", "translate(100,100)");
+
+    temData = [
+        {'continent': 0, "gdp":0, "cases":0},
+        {'continent': 1, "gdp":0, "cases":0},
+        {'continent': 2, "gdp":0, "cases":0},
+        {'continent': 3, "gdp":0, "cases":0},
+        {'continent': 4, "gdp":0, "cases":0},
+        {'continent': 5, "gdp":0, "cases":0}
+    ]
+    var x = d3.scaleBand()
+        .padding(0.2)
+        .range([0, 500])
+        .domain(temData.map(function(d) {
+            return d.continent
+        }))
+
+
+    svg.append("g")
+        .attr("transform", "translate(0, 500)")
+        .call(d3.axisBottom(x))
+        .attr('class', 'xaxis')
+    
+    svg.append("text")
+        .text("Continents")
+        .attr("x", 200)
+        .attr("y", 550)
+        // .attr("text-anchor", "end")
+    
+    var y = d3.scaleLinear()
+        .domain([0, 0])
+        .range([0, 500])
+
+    svg.append("g")
+        .call(d3.axisLeft(y))
+        .attr('class', 'yaxis')
+
+    svg.append("text")
+        .attr("x", -200)
+        .attr("y", -50)
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .text("gdp_per_capita & new_cases")
+
+
+    var bar = svg.selectAll("bar") 
+        .data(temData)
+        .enter()
+        .append("g")
+
+    bar.append("rect") 
+        .attr('class', 'Case') 
+        .style("fill", "green")
+        .attr("x", function(d) { 
+            return x(d.continent) 
+        })
+        .attr("y", function(d) { 
+            return y(d.cases)
+        }) 
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function(d) {
+            return 500 - y(d.cases); 
+        })
+
+    bar.append("rect") 
+        .attr('class', 'GDP')
+        .style("fill", "red")
+        .attr("width", x.bandwidth()/2)
+        .attr("height", function(d) {
+            return 500 - y(d.gdp)
+        }) 
+        .attr("x", function(d) {
+            return x(d.continent)+x.bandwidth()/2
+        })
+        .attr("y", function(d) {
+            return y(d.gdp)
+        }) 
+
+
+function show(year) {
+    d3.csv(covid).then(function(data) {
+        var yearData = []
+        for (var i=0; i<data.length; i++) {
+            var curdate = new Date(data[i].date)
+            if (curdate.getFullYear() == year) {
+                yearData.push(data[i])
+            }
+        }
+        temData = []
+        var continents = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"]
+        for (var i = 0; i<continents.length; i++) {
+            var tem = {};
+            tem.continent = continents[i];
+            tem.gdp = 0
+            tem.cases = 0
+            var counter = 0
+            for (var j=0; j<yearData.length; j++) {
+                if (yearData[j].continent == continents[i]) {
+                    if (yearData[j].gdp_per_capita && yearData[j].new_cases){
+                        tem.gdp = tem.gdp + parseInt(yearData[j].gdp_per_capita)
+                        tem.cases = tem.cases + parseInt(yearData[j].new_cases)
+                        counter ++;
+                    }
+                }
+            }
+            tem.gdp = tem.gdp/counter
+            tem.cases = tem.cases/counter
+            temData.push(tem)
+        }
+
+        rectMax = temData[0].gdp
+        for (var i=0; i<temData.length; i++) {
+            if (temData[i].gdp>rectMax) {
+                rectMax = temData[i].gdp;
+            }
+            if (temData[i].cases>rectMax) {
+                rectMax = temData[i].cases;
+            }
+        }
+        // get the ordered continents (ordered by gdp)
+        continents = d3.map(temData, function(d){
+            return(d.continent)
+        })
+
+        // update the axis
+        var xaxis= d3.selectAll(".xaxis")
+            x.domain(temData.map(function(d) {
+                return d.continent
+            }))
+        var yaxis = d3.selectAll(".yaxis")
+            y.domain([rectMax, 0])
+
+        yaxis.transition()
+            .call(d3.axisLeft(y))
+        xaxis.transition()
+            .call(d3.axisBottom(x))
+
+        var Case = d3.selectAll(".Case") 
+            .data(temData)
+            .transition() 
+            .attr("x", function(d) {
+                return x(d.continent)
+            })
+            .attr("y", function(d) {
+                return y(d.cases)
+            }) 
+            .attr("width", x.bandwidth()/2)
+            .attr("height", function(d) {
+                return max - y(d.cases)
+            }) 
+
+        var GDP = d3.selectAll(".GDP") 
+            .data(temData)
+            .transition()
+            .attr("x", function(d) { 
+                return x(d.continent)+x.bandwidth()/2
+            })
+            .attr("y", function(d) {
+                return y(d.gdp)
+            }) 
+            .attr("width", x.bandwidth()/2)
+            .attr("height", function(d) { return max - y(d.gdp); }) 
+
+    })
+}
+
+show(2020)
+</script>
+
+</html>
