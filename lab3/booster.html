@@ -32,11 +32,9 @@ function show(country) {
         for (var i = 0; i < counData.length; i++) {
             var temList = []
             temList.push(counData[i].new_deaths_per_million)
-            // temList.push(counData[i].new_cases)
             temList.push(counData[i].total_boosters_per_hundred)
             temData.push(temList)
         }
-        // console.log(temData)
 
         
         var xSize = 600
@@ -73,11 +71,21 @@ function show(country) {
                 return x(d[0])
             } )
             .attr("cy", function (d) {
-                console.log(d[1])
                 return y(d[1])
             } )
             .attr("r", 5)
             .style("fill", "red")
+
+        svg.append("text")
+            .attr("x", 250)
+            .attr("y", 450)
+            .text("total_boosters %")
+
+        svg.append("text")
+            .attr("x", -200)
+            .attr("y", -50)
+            .attr("transform", "rotate(-90)")
+            .text("new_deaths_per_million")
 
     })
 }
