@@ -99,6 +99,7 @@
 								var axisG = svg.append("g")
 									.attr("id", "mapSvg_g")
 									.attr("transform", `translate(${margin.left}, ${margin.top})`);
+								axisG.append("g").append("text").text("California")
 
 								var projection = d3.geoMercator().translate([width / 2, height / 2]).scale(2300).center([
 									-120, 37
@@ -274,7 +275,7 @@
 							ocean_proximity: 'all'
 						}, "drawControlerMapSVG", 2)
 						drawMap(scsvData, {
-							ocean_proximity: 'all'
+							ocean_proximity: 'NEAR BAY'
 						}, "drawFollorMapSVG")
 
 						function drawTop5TotalRoomAndBedRoom(scsvData, filter) {
@@ -471,7 +472,7 @@
 
 						}
 						drawTop5TotalRoomAndBedRoom(scsvData, {
-							ocean_proximity: 'all'
+							ocean_proximity: 'NEAR BAY'
 						})
 
 						function drawHouseValueAndAge(scsvData, filter) {
@@ -574,10 +575,12 @@
 
 							var xsvg = axisG.append('g').attr('class', 'axis')
 								.attr('transform', 'translate(0,' + height + ')')
+								.transition()
 								.call(d3.axisBottom(x));
 
 							var ysvg = axisG.append('g').attr('class', 'axis')
 								.attr('transform', 'translate(0,0)')
+								.transition()
 								.call(d3.axisLeft(y));
 
 							axisG.append("g").append("path")
@@ -612,7 +615,7 @@
 								.text("housing median age")
 						}
 						drawHouseValueAndAge(scsvData, {
-							ocean_proximity: 'all'
+							ocean_proximity: 'NEAR BAY'
 						});
 
 
@@ -928,6 +931,15 @@
 										return "rgba(0,0,255,0.8)";
 									}
 									return "rgba(255,0,0,0.8)";
+								}).each(function(d){
+									var _this = this;
+									d3.select(this).on('mouseover',function(event){
+										d3.select(_this).attr("r",5)
+									})
+									
+									d3.select(this).on('mouseout',function(event){
+										d3.select(_this).attr("r",2)
+									})
 								})
 
 							axisG.append("g")
@@ -946,7 +958,7 @@
 
 						drawPopulationMedianIncome(scsvData, {
 							population: 10000,
-							ocean_proximity: 'all'
+							ocean_proximity: 'NEAR BAY'
 
 						})
 					}
