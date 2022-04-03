@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="https://d3js.org/d3.v7.min.js"></script>
+		<style>
+			.firstFloor {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-around;
+				align-items: center;
+				background-color: rgba(240, 240, 240, 0.5);
+				margin-bottom: 30px;
+			}
+
+			.secondFloor {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-around;
+				align-items: center;
+				background-color: rgba(230, 230, 230, 0.5);
+			}
+
+			.zeroFloor {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-around;
+				align-items: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="zeroFloor">
+			<div id="drawControlerMapSVG" style="border: 1px solid #55007f;"></div>
+			<div id="drawFollorMapSVG" style="background-color: rgba(240,240,240,0.5);"></div>
+		</div>
+		<div class="firstFloor">
+			<div id="populationMedianIncomeSVG"></div>
+			<div id="drawHouseValueAndAgeSVG"></div>
+			<div id="drawTop5TotalRoomAndBedRoomSVG"></div>
+		</div>
+
+		<div class="secondFloor">
+			<div id="drawMapSVG"></div>
+			<div id="PopulationPieSVG"></div>
+			<div id="latitudeMedianIncomeSVG"></div>
+		</div>
+		<script>
+			//population median_income
+			d3.csv("./housing.csv")
+				.then(
+					function(scsvData) {
+
+						function drawMap(scsvData, filter, apendSVGID = "drawMapSVG", kindType = 1) {
+							//document.querySelector("#"+apendSVGID).innerHTML = "";
+							var min_median_house_value = scsvData[0].median_house_value * 1.0;
+							var max_median_house_value = 0;
+							scsvData.forEach((d, i) => {
+								if (filter.ocean_proximity != 'all') {
+									if (filter.ocean_proximity != d.ocean_proximity) {
+										return;
+									}
+								}
+
+								d.median_house_value = d.median_house_value * 1.0
+								if (d.median_house_value > max_median_house_value) {
+									max_median_house_value = d.median_house_value
+								}
+								if (d.median_house_value < min_median_house_value) {
+									min_median_house_value = d.median_house_value
+								}
+							})
+
+							d3.json("./california.geojson").then(function(usaData) {
+								var outerHeight = 600;
+								var outerWidth = 600;
+								var barMagin = 20;
+								var margin = {
+									top: 30,
+									left: 60,
+									bottom: 30,
+									right: 30
+								}
+								var height = outerHeight - margin.top - margin.bottom;
+								var width = outerWidth - margin.left - margin.right;
+								var svg = d3.select('#' + apendSVGID).select("#mapSvg")
+								if (svg.empty()) {
+									svg = d3.select('#' + apendSVGID).append("svg")
+										.attr("id", "mapSvg")
+										.attr("height",
+											outerHeight)
+										.attr(
+											"width",
+											outerWidth);
+
+								}
+								svg.select("#mapSvg_g").remove();
+								var axisG = svg.append("g")
+									.attr("id", "mapSvg_g")
+									.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+								var projection = d3.geoMercator().translate([width / 2, height / 2]).scale(2300).center([
+									-120, 37
+								]);
+								var path = d3.geoPath().projection(projection);
+								axisG.selectAll("path")
+									.data(usaData)
+									.enter()
+									.append("path")
+									.attr("class", "continent")
+									.style("stroke", "rgb(153,153,153)")
+									.style("fill", function(d, i, n) {
+										return "white";
+									})
+									.attr("d", path)
+
+								/*var colorValues = ["rgb(245,146,114)", "rgb(243,106,73)", "rgb(230, 48, 38)",
+									"rgb(158, 14, 19)"
+								];*/
+								var colorValues = ["rgb(255, 151, 119)",
+									"rgb(126, 10, 16)"
+								];
+								var colorValues2 = {
+									'NEAR BAY': "rgba(255,0,0,0.8)",
+									"<1H OCEAN": "rgba(85, 255, 127, 0.8)",
+									"INLAND": "rgba(255, 255, 0, 0.8)",
+									"NEAR OCEAN": "rgba(170, 0, 127, 0.8)",
+									"ISLAND": "rgba(0, 0, 0, 0.8)"
+								}
+								//var colorRange = d3.scaleQuantize()
+								var colorRange = d3.scaleLinear()
+									.domain([min_median_house_value, max_median_house_value])
+									.range(colorValues);
+
+								var circles = axisG.append('g').selectAll("circle")
+									.data(scsvData.filter(function(d) {
+										if (filter.ocean_proximity == 'all') {
+											return true;
+										} else if (filter.ocean_proximity == d.ocean_proximity) {
+											return true;
+										}
+										return false;
+									}))
+									.enter()
+									.append("circle")
+									.attr("cx", d => projection([d.longitude, d.latitude])[0])
+									.attr("cy", d => projection([d.longitude, d.latitude])[1])
+									.attr("r", kindType == 2 ? 5 : 2)
+									.style("fill", function(d) {
+										if (kindType == 1) {
+											return colorRange(d.median_house_value);
+										} else {
+											return colorValues2[d.ocean_proximity];
+										}
+									})
+
+								if (kindType == 2) {
+									circles.each(function(_d) {
+										d3.select(this).on("click", function(event) {
+											drawMap(scsvData, {
+												ocean_proximity: _d.ocean_proximity
+											}, "drawFollorMapSVG")
+
+											drawTop5TotalRoomAndBedRoom(scsvData, {
+												ocean_proximity: _d.ocean_proximity
+											})
+
+											drawHouseValueAndAge(scsvData, {
+												ocean_proximity: _d.ocean_proximity
+											});
+
+											drawPopulationMedianIncome(scsvData, {
+												population: 10000,
+												ocean_proximity: _d.ocean_proximity
+
+											})
+											//console.log("ok",_d)
+										})
+									})
+								}
+
+								if (kindType == 1) {
+									/*axisG.append('g')
+										.append("text")
+										.style("font-size", "12px")
+										.style("font-weight", "bold")
+										.attr("x", outerWidth - 250)
+										.attr("y", 0)
+										.text("median house value")
+									var jiange = (max_median_house_value - min_median_house_value) / colorValues.length;
+									colorValues.forEach((d, i) => {
+										axisG.append('g')
+											.append("rect")
+											.attr("x", outerWidth - 250)
+											.attr("y", 30 * i + 15)
+											.attr("width", 30)
+											.attr("height", 15)
+											.style("fill", colorValues[i])
+
+										axisG.append('g')
+											.append("text")
+											.style("font-size", "12px")
+											.style("font-weight", "bold")
+											.attr("x", outerWidth - 210)
+											.attr("y", 30 * i + 30)
+											.text((min_median_house_value + jiange * i) + "-" + (
+												min_median_house_value + (jiange * (i + 1))))
+									})*/
+								}
+
+								if (kindType == 2) {
+									var i = 0;
+									for (var property in colorValues2) {
+										axisG.append('g')
+											.append("rect")
+											.attr("x", outerWidth - 250)
+											.attr("y", 30 * i + 15)
+											.attr("width", 30)
+											.attr("height", 15)
+											.style("fill", colorValues2[property])
+
+										axisG.append('g')
+											.append("text")
+											.style("font-size", "12px")
+											.style("font-weight", "bold")
+											.attr("x", outerWidth - 210)
+											.attr("y", 30 * i + 30)
+											.text(property)
+										i++
+									}
+
+
+									var controlG = axisG.append('g')
+										.on("click", function(d) {
+											drawMap(scsvData, {
+												ocean_proximity: "all"
+											}, "drawFollorMapSVG")
+											drawTop5TotalRoomAndBedRoom(scsvData, {
+												ocean_proximity: "all"
+											})
+											drawHouseValueAndAge(scsvData, {
+												ocean_proximity: "all"
+											});
+											drawPopulationMedianIncome(scsvData, {
+												population: 10000,
+												ocean_proximity: "all"
+
+											})
+										})
+										.style("cursor", "pointer");
+									controlG.append("rect")
+										.attr("x", outerWidth - 250)
+										.attr("y", 30 * 5 + 15)
+										.attr("width", 80)
+										.attr("height", 23)
+										.style("fill", "rgba(200,200,200,0.8)")
+
+									controlG.append('g')
+										.append("text")
+										.style("font-size", "12px")
+										.style("font-weight", "bold")
+										.attr("x", outerWidth - 235)
+										.attr("y", 30 * 5 + 30)
+										.text("go to All")
+								}
+							})
+						}
+						drawMap(scsvData, {
+							ocean_proximity: 'all'
+						})
+
+						drawMap(scsvData, {
+							ocean_proximity: 'all'
+						}, "drawControlerMapSVG", 2)
+						drawMap(scsvData, {
+							ocean_proximity: 'all'
+						}, "drawFollorMapSVG")
+
+						function drawTop5TotalRoomAndBedRoom(scsvData, filter) {
+							scsvData = JSON.parse(JSON.stringify(scsvData))
+							if (filter.ocean_proximity != 'all') {
+								var new_scsvData = scsvData.filter(function(d) {
+									if (d.ocean_proximity == filter.ocean_proximity) {
+										return true;
+									}
+									return false;
+								})
+								scsvData = new_scsvData;
+							}
+
+							scsvData = scsvData.sort(function(d2, d1) {
+								if (d2.median_house_value > d1.median_house_value) {
+									return -1;
+								}
+								if (d2.median_house_value == d1.median_house_value) {
+									return 0;
+								}
+								if (d2.median_house_value < d1.median_house_value) {
+									return 1;
+								}
+							});
+							scsvData.length = 5;
+
+							var minRooms = scsvData[0].total_rooms * 1.0,
+								maxRooms = 0;
+							scsvData.forEach(function(d, i) {
+								d.total_rooms = d.total_rooms * 1.0
+								d.population = d.population * 1.0
+								if (minRooms > d.total_rooms) {
+									minRooms = d.total_rooms
+								}
+								if (maxRooms < d.total_rooms) {
+									maxRooms = d.total_rooms
+								}
+
+								if (minRooms > d.population) {
+									minRooms = d.population
+								}
+								if (maxRooms < d.population) {
+									maxRooms = d.population
+								}
+								scsvData[i].index = i;
+							})
+
+							var outerHeight = 400;
+							var outerWidth = 600;
+							var barMagin = 20;
+							var margin = {
+								top: 30,
+								left: 60,
+								bottom: 30,
+								right: 30
+							}
+							var height = outerHeight - margin.top - margin.bottom;
+							var width = outerWidth - margin.left - margin.right;
+							//document.querySelector("#drawTop5TotalRoomAndBedRoomSVG").innerHTML = "";
+							var svg = d3.select('#drawTop5TotalRoomAndBedRoomSVG').select("#Top5TotalRoomAndBedRoomSVG");
+							if (svg.empty()) {
+								svg = d3.select('#drawTop5TotalRoomAndBedRoomSVG').append("svg")
+									.attr("id", "Top5TotalRoomAndBedRoomSVG").attr("height", outerHeight)
+									.attr(
+										"width",
+										outerWidth);
+							}
+							svg.select("#axisG").remove()
+							var axisG = svg.append("g").attr("id", "axisG")
+								.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
+							const y = d3.scaleLinear()
+								.domain([minRooms * 0.8, maxRooms * 1.2])
+								.range([height, 0]);
+
+							const xValue = ["Top1", "Top2", "Top3", "Top4", "Top5"];
+							const x = d3.scaleBand()
+								.domain(xValue)
+								.range([0, width]);
+
+							var xsvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,' + height + ')')
+								.call(d3.axisBottom(x));
+
+							var ysvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,0)')
+								.call(d3.axisLeft(y));
+
+							axisG.selectAll(".bar1")
+								.data(scsvData)
+								.enter().append("rect")
+								.attr("class", "bar")
+								.attr("x", function(d, i) {
+									return x(xValue[i]) + barMagin;
+								})
+								.attr("width", (x.bandwidth() - 2 * barMagin) / 2)
+								.attr("y", function(d) {
+									return y(d.population);
+								})
+								.style("cursor", "pointer")
+								.style("fill", "rgba(0, 0, 127, 0.8)")
+								.attr("height", function(d) {
+									return height - y(d.population);
+								}).on("mouseover", (event, d) => {
+									if (!axisG.select("#tips").empty()) {
+										axisG.select("#tips").remove();
+									}
+									axisG.append("g")
+										.attr("id", "tips")
+										.append("text")
+										.attr("x", x(xValue[d.index]) + barMagin + (x.bandwidth() - 2 * barMagin) / 4)
+										.attr("y", y(d.population))
+										.text(d.population)
+										.style("stroke", "rgba(0, 0, 127, 0.8)")
+										.style("text-anchor", "middle")
+								}).on("mouseout", (event, d) => {
+									axisG.select("#tips").remove();
+								});
+							axisG.selectAll(".bar2")
+								.data(scsvData)
+								.enter().append("rect")
+								.attr("class", "bar")
+								.attr("x", function(d, i) {
+									return x(xValue[i]) + (x.bandwidth() - 2 * barMagin) / 2 + barMagin;
+								})
+								.attr("width", (x.bandwidth() - 2 * barMagin) / 2)
+								.attr("y", function(d) {
+									return y(d.total_rooms);
+								})
+								.style("cursor", "pointer")
+								.style("fill", "rgba(85, 85, 0, 0.8)")
+								.attr("height", function(d) {
+									return height - y(d.total_rooms);
+								}).on("mouseover", function(event, d) {
+									if (!axisG.select("#tips").empty()) {
+										axisG.select("#tips").remove();
+									}
+									axisG.append("g")
+										.attr("id", "tips")
+										.append("text")
+										.attr("x", x(xValue[d.index]) + barMagin + 3 * (x.bandwidth() - 2 * barMagin) / 4)
+										.attr("y", y(d.total_rooms))
+										.text(d.total_rooms)
+										.style("stroke", "rgba(85, 85, 0, 0.8)")
+										.style("text-anchor", "middle")
+								}).on("mouseout", function(event, d) {
+									axisG.select("#tips").remove();
+								});
+							axisG.append("g")
+								.append("text")
+								.attr("x", -120)
+								.attr("y", 20)
+								.style("font-size", '12px')
+								.style("font-weight", 'bold')
+								.attr("transform", `rotate(-90)`)
+								.text("")
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", outerWidth - 280)
+								.attr("y", outerHeight - 30)
+								.style("font-size", '12px')
+								.style("font-weight", 'bold')
+								.text("top 5 of median house value")
+							console.log(scsvData);
+
+							axisG.append("g").append("rect")
+								.attr("x", outerWidth - 200)
+								.attr("y", 0)
+								.attr("width", 30)
+								.attr("height", 15)
+								.style("fill", "rgba(0, 0, 127, 0.8)")
+
+							axisG.append("g").append("rect")
+								.attr("x", outerWidth - 200)
+								.attr("y", 20)
+								.attr("width", 30)
+								.attr("height", 15)
+								.style("fill", "rgba(85, 85, 0, 0.8)")
+
+							axisG.append("g").append("text")
+								.attr("x", outerWidth - 170)
+								.attr("y", 10)
+								.style("fill", "rgba(0, 0, 127, 0.8)")
+								.text("population")
+
+							axisG.append("g").append("text")
+								.attr("x", outerWidth - 170)
+								.attr("y", 33)
+								.style("fill", "rgba(85, 85, 0, 0.8)")
+								.text("total rooms")
+
+						}
+						drawTop5TotalRoomAndBedRoom(scsvData, {
+							ocean_proximity: 'all'
+						})
+
+						function drawHouseValueAndAge(scsvData, filter) {
+							scsvData = JSON.parse(JSON.stringify(scsvData))
+							//x housing_median_age
+							//y median_house_value
+							var scsvDataJSON = {};
+							scsvData.forEach(function(d, i) {
+								if (filter.ocean_proximity != "all") {
+									if (filter.ocean_proximity != d.ocean_proximity) {
+										return;
+									}
+								}
+								if (!scsvDataJSON[d.housing_median_age]) {
+									scsvDataJSON[d.housing_median_age] = {
+										num: 0,
+										subMedianHouseValue: 0.0
+									};
+								}
+								scsvDataJSON[d.housing_median_age].num++;
+								scsvDataJSON[d.housing_median_age].subMedianHouseValue += d.median_house_value * 1.0
+							});
+							var csvData = [];
+							var maxHousingMedianAge = 0;
+							var minHousingMedianAge = scsvData[0].housing_median_age;
+
+							var maxMedianHouseValue = 0;
+							var minMedianHouseValue = scsvData[0].median_house_value;
+							for (var property in scsvDataJSON) {
+								var avgMedianHouseValue = scsvDataJSON[property].subMedianHouseValue / scsvDataJSON[property]
+									.num;
+								property = 1.0 * property;
+
+								if (maxHousingMedianAge < property) {
+									maxHousingMedianAge = property
+								}
+								if (minHousingMedianAge > property) {
+									minHousingMedianAge = property
+								}
+								if (maxMedianHouseValue < avgMedianHouseValue) {
+									maxMedianHouseValue = avgMedianHouseValue
+								}
+								if (minMedianHouseValue > avgMedianHouseValue) {
+									minMedianHouseValue = avgMedianHouseValue
+								}
+
+
+								csvData.push({
+									housing_median_age: property,
+									median_house_value: avgMedianHouseValue
+								});
+							}
+
+							console.log(maxHousingMedianAge, minHousingMedianAge, maxMedianHouseValue, minMedianHouseValue);
+
+							csvData = csvData.sort(function(d2, d1) {
+								if (d2.housing_median_age > d1.housing_median_age) {
+									return 1;
+								}
+								if (d2.housing_median_age == d1.housing_median_age) {
+									return 0;
+								}
+								if (d2.housing_median_age < d1.housing_median_age) {
+									return -1;
+								}
+							})
+
+							var outerHeight = 400;
+							var outerWidth = 500;
+							var margin = {
+								top: 30,
+								left: 60,
+								bottom: 40,
+								right: 30
+							}
+							var height = outerHeight - margin.top - margin.bottom;
+							var width = outerWidth - margin.left - margin.right;
+							//document.querySelector("#drawHouseValueAndAgeSVG").innerHTML = "";
+							var svg = d3.select('#drawHouseValueAndAgeSVG').select("#houseValueAndAgeSVG");
+							if (svg.empty()) {
+								svg = d3.select('#drawHouseValueAndAgeSVG').append("svg")
+									.attr("id", "houseValueAndAgeSVG")
+									.attr("height", outerHeight).attr(
+										"width",
+										outerWidth);
+							}
+							svg.select("#axisG").remove();
+							var axisG = svg.append("g")
+								.attr("id", "axisG")
+								.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
+							const y = d3.scaleLinear()
+								.domain([minMedianHouseValue * 0.8, maxMedianHouseValue])
+								.range([height, 0]);
+
+							const x = d3.scaleLinear()
+								.domain([minHousingMedianAge, maxHousingMedianAge])
+								.range([0, width]);
+
+							var xsvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,' + height + ')')
+								.call(d3.axisBottom(x));
+
+							var ysvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,0)')
+								.call(d3.axisLeft(y));
+
+							axisG.append("g").append("path")
+								.datum(csvData)
+								.attr("fill", "none")
+								.attr("stroke", "rgba(85, 0, 0, 0.8)")
+								.attr("stroke-width", 1.5)
+								.attr("d", d3.line()
+									.x(function(d) {
+										return x(d.housing_median_age)
+									})
+									.y(function(d) {
+										return y(d.median_house_value)
+									}).curve(csvData.length>20? d3.curveNatural:d3.curveLinear)
+								);
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", -120)
+								.attr("y", 20)
+								.style("font-size", '12px')
+								.style("font-weight", 'bold')
+								.attr("transform", `rotate(-90)`)
+								.text("median house value")
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", outerWidth - 220)
+								.attr("y", outerHeight - 40)
+								.style("font-size", '12px')
+								.style("font-weight", 'bold')
+								.text("housing median age")
+						}
+						drawHouseValueAndAge(scsvData, {
+							ocean_proximity: 'all'
+						});
+
+
+
+
+
+
+
+
+
+
+						function drawPopulationPie(scsvData, filter) {
+							scsvData = JSON.parse(JSON.stringify(scsvData))
+							var csvDataJson = {};
+							scsvData.forEach(function(d, i) {
+								if (!csvDataJson[d.ocean_proximity]) {
+									csvDataJson[d.ocean_proximity] = 0;
+								}
+								csvDataJson[d.ocean_proximity] += d.population * 1.0;
+							})
+
+							var csvData = [];
+							for (var property in csvDataJson) {
+								csvData.push([
+									property,
+									csvDataJson[property]
+								])
+							}
+							var outerHeight = 400;
+							var outerWidth = 400;
+							var margin = {
+								top: 30,
+								left: 30,
+								bottom: 30,
+								right: 30
+							}
+							var height = outerHeight - margin.top - margin.bottom;
+							var width = outerWidth - margin.left - margin.right;
+							document.querySelector("#PopulationPieSVG").innerHTML = "";
+							var svg = d3.select('#PopulationPieSVG').append("svg").attr("height", outerHeight).attr(
+								"width",
+								outerWidth);
+
+							var pieSVGG = svg.append("g").attr("transform", "translate(" + outerWidth / 2 + "," + outerHeight /
+								2 + ")")
+							var color_three = d3.scaleOrdinal(d3.schemeCategory10);
+							var arc_generator = d3.arc()
+								.innerRadius(0)
+								.outerRadius(height / 2);
+
+							var angle_data = d3.pie()
+								.value(function(d) {
+									return d[1];
+								});
+							var arcs = pieSVGG.append("g").selectAll("path")
+								.data(angle_data(csvData))
+								.enter()
+								.append("path")
+								.attr("d", arc_generator)
+								.style("fill", function(d, i) {
+									return color_three(i);
+								}).on("mouseover", function(event, d) {
+									pieSVGG.append("g")
+										.attr("id", "showPieValue")
+										.append("text")
+										.style("stroke","white")
+										.style("fill","white")
+										.style("text-anchor","middle")
+										.text(d.data[1])
+								}).on("mouseout", function(event, d) {
+									pieSVGG.select("#showPieValue").remove();
+								});
+							console.log(csvData)
+							pieSVGG.append("g")
+								.selectAll("text")
+								.data(angle_data(csvData))
+								.enter()
+								.append("text")
+								.style("font-size", "12px")
+								.style("font-weight", "bold")
+								.attr("transform", (d) => {
+									var x = arc_generator.centroid(d)[0] * 1;
+									var y = arc_generator.centroid(d)[1] * 1;
+									return "translate(" + x + "," + y + ") rotate(" + ((d.endAngle) * 180 / Math.PI - 90 - ((
+										d.endAngle - d
+										.startAngle) / 2 * 180 / Math.PI)) + ")"
+								})
+								.text((d, i) => {
+									return d.data[0];
+								})
+						}
+						drawPopulationPie(scsvData, {})
+
+
+
+						function drawLatitudeMedianIncome(scsvData, filter) {
+							scsvData = JSON.parse(JSON.stringify(scsvData))
+							var csvDataJson = {};
+							scsvData.forEach(function(d, i) {
+								if (!csvDataJson[d.latitude]) {
+									csvDataJson[d.latitude] = {
+										num: 0,
+										subMedianIncome: 0.0
+									}
+								}
+								csvDataJson[d.latitude].num += 1;
+								csvDataJson[d.latitude].subMedianIncome += d.median_income * 1.0
+							});
+							var csvData = [];
+							var maxLatitude = 0,
+								minLatitude = scsvData[0].latitude,
+								maxMedianIncome = 0,
+								minMedianIncome = scsvData[0].median_income;
+							for (var property in csvDataJson) {
+								var medianIncome = csvDataJson[property].subMedianIncome / csvDataJson[property].num;
+								property = property * 1.0;
+								if (property > maxLatitude) {
+									maxLatitude = property;
+								}
+
+								if (property < minLatitude) {
+									minLatitude = property;
+								}
+
+								if (maxMedianIncome < medianIncome) {
+									maxMedianIncome = medianIncome;
+								}
+
+								if (minMedianIncome > medianIncome) {
+									minMedianIncome = medianIncome;
+								}
+
+								csvData.push({
+									latitude: property,
+									medianIncome: medianIncome
+								})
+							}
+
+							console.log(maxLatitude, minLatitude, maxMedianIncome, minMedianIncome);
+
+							csvData = csvData.sort(function(d2, d1) {
+								if (d2.latitude > d1.latitude) {
+									return 1;
+								}
+								if (d2.latitude == d1.latitude) {
+									return 0;
+								}
+								if (d2.latitude < d1.latitude) {
+									return -1;
+								}
+							})
+
+							var outerHeight = 400;
+							var outerWidth = 600;
+							var margin = {
+								top: 30,
+								left: 30,
+								bottom: 30,
+								right: 30
+							}
+							var height = outerHeight - margin.top - margin.bottom;
+							var width = outerWidth - margin.left - margin.right;
+							document.querySelector("#latitudeMedianIncomeSVG").innerHTML = "";
+							var svg = d3.select('#latitudeMedianIncomeSVG').append("svg").attr("height", outerHeight).attr(
+								"width",
+								outerWidth);
+							var axisG = svg.append("g")
+								.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+
+							const y = d3.scaleLinear()
+								.domain([0, maxMedianIncome * 1.5])
+								.range([height, 0]);
+
+							const x = d3.scaleLinear()
+								.domain([minLatitude, maxLatitude])
+								.range([0, width]);
+
+							var xsvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,' + height + ')')
+								.call(d3.axisBottom(x));
+
+							var ysvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,0)')
+								.call(d3.axisLeft(y));
+
+							axisG.append("g").append("path")
+								.datum(csvData)
+								.attr("fill", "none")
+								.attr("stroke", "rgba(0,0,0,0.8)")
+								.attr("stroke-width", 1.5)
+								.attr("d", d3.line()
+									.x(function(d) {
+										return x(d.latitude)
+									})
+									.y(function(d) {
+										return y(d.medianIncome)
+									}).curve(d3.curveNatural)
+								);
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", -90)
+								.attr("y", 20)
+								.attr("transform", `rotate(-90)`)
+								.text("median income")
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", outerWidth - 120)
+								.attr("y", outerHeight - 30)
+								.text("latitude")
+							//console.log(csvData)
+						}
+						drawLatitudeMedianIncome(scsvData, {})
+
+
+
+
+
+						function drawPopulationMedianIncome(scsvData, filter) {
+							scsvData = JSON.parse(JSON.stringify(scsvData))
+							var csvData = [];
+							scsvData.forEach(function(d, i) {
+								if (filter.ocean_proximity != 'all') {
+									if (filter.ocean_proximity != d.ocean_proximity) {
+										return;
+									}
+								}
+								if (d.population <= filter.population) {
+									csvData.push(d)
+								}
+							})
+
+							var maxPopulation = 0;
+							var minPopulation = 1.0 * csvData[0]["population"];
+
+							var maxMedianIncome = 0;
+							var minMedianIncome = 1.0 * csvData[0]["median_income"];
+							csvData.forEach(function(d, i) {
+								d["population"] = d["population"] * 1.0
+								d["median_income"] = d["median_income"] * 1.0
+								if (d["population"] > maxPopulation) {
+									maxPopulation = d["population"];
+								}
+
+								if (d["population"] < minPopulation) {
+									minPopulation = d["population"];
+								}
+
+								if (d["median_income"] > maxMedianIncome) {
+									maxMedianIncome = d["median_income"];
+								}
+
+								if (d["population"] < minMedianIncome) {
+									minMedianIncome = d["median_income"];
+								}
+							})
+
+							//console.log(maxPopulation, minPopulation, maxMedianIncome, minMedianIncome)
+
+							var outerHeight = 400;
+							var outerWidth = 400;
+							var margin = {
+								top: 30,
+								left: 30,
+								bottom: 40,
+								right: 30
+							}
+							var height = outerHeight - margin.top - margin.bottom;
+							var width = outerWidth - margin.left - margin.right;
+							document.querySelector("#populationMedianIncomeSVG").innerHTML = "";
+							var svg = d3.select('#populationMedianIncomeSVG').select("#svgpopulationMedianIncomeSVG");
+							if (svg.empty()) {
+								svg = d3.select('#populationMedianIncomeSVG').append("svg").attr("height", outerHeight).attr(
+									"width",
+									outerWidth).attr("id", "svgpopulationMedianIncomeSVG");
+							}
+							svg.select("#axisG").remove();
+							var axisG = svg.append("g")
+								.attr("id", "axisG")
+								.attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+							const y = d3.scaleLinear()
+								.domain([minMedianIncome * 0.5, maxMedianIncome * 1.5])
+								//.domain([0, maxMedianIncome * 1.5])
+								.range([height, 0]);
+
+							const x = d3.scaleLinear()
+								.domain([minPopulation * 0.5, maxPopulation])
+								.range([0, width]);
+
+							var xsvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,' + height + ')')
+								.call(d3.axisBottom(x));
+
+							var ysvg = axisG.append('g').attr('class', 'axis')
+								.attr('transform', 'translate(0,0)')
+								.call(d3.axisLeft(y));
+
+							var circles = axisG.append('g').selectAll("circle")
+								.data(csvData)
+								.enter()
+								.append("circle")
+								.attr("population", d => d.population)
+								.attr("medianIncome", d => d.median_income)
+								.attr("cx", d => x(1.0 * d.population))
+								.attr("cy", d => y(1.0 * d.median_income))
+								.attr("r", 2)
+								.style("fill", function(d) {
+									if (d.population * d.median_income < 15000 && d.population < 3500 && d.median_income <
+										8) {
+										return "rgba(0,0,255,0.8)";
+									}
+									return "rgba(255,0,0,0.8)";
+								})
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", -90)
+								.attr("y", 20)
+								.attr("transform", `rotate(-90)`)
+								.text("median income")
+
+							axisG.append("g")
+								.append("text")
+								.attr("x", outerWidth - 120)
+								.attr("y", outerHeight - 35)
+								.text("population")
+						}
+
+						drawPopulationMedianIncome(scsvData, {
+							population: 10000,
+							ocean_proximity: 'all'
+
+						})
+					}
+				);
+		</script>
+	</body>
+</html>
