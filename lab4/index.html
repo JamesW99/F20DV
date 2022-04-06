@@ -594,8 +594,38 @@
 									})
 									.y(function(d) {
 										return y(d.median_house_value)
-									}).curve(csvData.length>20? d3.curveNatural:d3.curveLinear)
+									}).curve(csvData.length > 20 ? d3.curveNatural : d3.curveLinear)
 								);
+
+							axisG.append("g")
+								.selectAll("circle")
+								.data(csvData)
+								.enter()
+								.append("circle")
+								.attr("cx", d => x(d.housing_median_age))
+								.attr("cy", d => y(d.median_house_value))
+								.style("fill", "rgba(255,0,0,0.8)")
+								.attr("r", 4)
+								.each(function(d) {
+									d3.select(this).on("mouseover", function(event) {
+										if (!axisG.select("#tips").empty()) {
+											axisG.select("#tips").remove();
+										}
+										var firstX = x(d.housing_median_age)
+										if(firstX > width - 50){
+											firstX = outerWidth - 140
+										}
+										axisG.append("g")
+											.attr("id", "tips")
+											.append("text")
+											.attr("x", firstX)
+											.attr("y", y(d.median_house_value)-10)
+											.style("text-anchor","center")
+											.text(d.median_house_value.toFixed(2))
+									}).on("mouseout", function(event) {
+										axisG.select("#tips").remove();
+									})
+								})
 
 							axisG.append("g")
 								.append("text")
@@ -681,9 +711,9 @@
 									pieSVGG.append("g")
 										.attr("id", "showPieValue")
 										.append("text")
-										.style("stroke","white")
-										.style("fill","white")
-										.style("text-anchor","middle")
+										.style("stroke", "white")
+										.style("fill", "white")
+										.style("text-anchor", "middle")
 										.text(d.data[1])
 								}).on("mouseout", function(event, d) {
 									pieSVGG.select("#showPieValue").remove();
@@ -900,7 +930,7 @@
 								.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 							const y = d3.scaleLinear()
-								.domain([0, maxMedianIncome * 1.5])
+								.domain([minMedianIncome * 0.5, maxMedianIncome * 1.5])
 								//.domain([0, maxMedianIncome * 1.5])
 								.range([height, 0]);
 
@@ -931,14 +961,14 @@
 										return "rgba(0,0,255,0.8)";
 									}
 									return "rgba(255,0,0,0.8)";
-								}).each(function(d){
+								}).each(function(d) {
 									var _this = this;
-									d3.select(this).on('mouseover',function(event){
-										d3.select(_this).attr("r",5)
+									d3.select(this).on('mouseover', function(event) {
+										d3.select(_this).attr("r", 5)
 									})
-									
-									d3.select(this).on('mouseout',function(event){
-										d3.select(_this).attr("r",2)
+
+									d3.select(this).on('mouseout', function(event) {
+										d3.select(_this).attr("r", 2)
 									})
 								})
 
