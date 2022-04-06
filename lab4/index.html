@@ -930,7 +930,7 @@
 								.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 							const y = d3.scaleLinear()
-								.domain([minMedianIncome * 0.5, maxMedianIncome * 1.5])
+								.domain([0, maxMedianIncome * 1.5])
 								//.domain([0, maxMedianIncome * 1.5])
 								.range([height, 0]);
 
